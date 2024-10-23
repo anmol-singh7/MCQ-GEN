@@ -1,0 +1,6 @@
+openai
+huggingface
+langchain
+streamlit
+puthon-dotenv
+PyPDF2
