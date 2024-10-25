@@ -1,4 +1,5 @@
 openai
+langchain-huggingface
 huggingface_hub
 transformers
 accelerate
