@@ -6,14 +6,15 @@ from dotenv import load_dotenv
 from src.mcqgenerator.utils import read_file, get_table_data
 from src.mcqgenerator.logger import logging
 
-from langchain_huggingface import HuggingFaceEndpoint
-from langchain.llms import HuggingFaceHub
+from langchain_community.llms import HuggingFaceHub
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
-from langchain.callbacks import get_openai_callback
 
+
+# Load environment variables from the .env file
 load_dotenv()
 
+# Access the environment variables just like you would with os.environ
 KEY = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 
 model_name ="google/flan-t5-large"
@@ -24,7 +25,8 @@ llm = HuggingFaceHub(
     
 )
 
-TEMPLATE="""
+
+template="""
 Text:{text}
 You are an expert MCQ maker. Given the above text, it is your job to \
 create a quiz  of {number} multiple choice questions for {subject} students in {tone} tone. 
@@ -38,13 +40,13 @@ Ensure to make {number} MCQs
 
 quiz_generation_prompt = PromptTemplate(
     input_variables=["text", "number", "subject", "tone", "response_json"],
-    template=TEMPLATE
-    )
-
-quiz_chain=LLMChain(llm=llm, prompt=quiz_generation_prompt, output_key="quiz", verbose=True)
+    template=template)
 
 
-TEMPLATE2="""
+quiz_chain=LLMChain(llm=llm,prompt=quiz_generation_prompt,output_key="quiz",verbose=True)
+
+
+template2="""
 You are an expert english grammarian and writer. Given a Multiple Choice Quiz for {subject} students.\
 You need to evaluate the complexity of the question and give a complete analysis of the quiz. Only use at max 50 words for complexity analysis. 
 if the quiz is not at per with the cognitive and analytical abilities of the students,\
@@ -55,16 +57,12 @@ Quiz_MCQs:
 Check from an expert English Writer of the above quiz:
 """
 
-quiz_evaluation_prompt=PromptTemplate(input_variables=["subject", "quiz"], template=TEMPLATE)
+
+quiz_evaluation_prompt=PromptTemplate(input_variables=["subject", "quiz"], template=template2)
 
 review_chain=LLMChain(llm=llm, prompt=quiz_evaluation_prompt, output_key="review", verbose=True)
 
+
+# This is an Overall Chain where we run the two chains in Sequence
 generate_evaluate_chain=SequentialChain(chains=[quiz_chain, review_chain], input_variables=["text", "number", "subject", "tone", "response_json"],
                                         output_variables=["quiz", "review"], verbose=True,)
-
-file_path=r"D:\ML Projects\MCQ GEN\data.txt"
-
-with open(file_path, 'r') as file:
-    TEXT = file.read()
-
-
