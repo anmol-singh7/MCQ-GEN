@@ -12,7 +12,7 @@ from src.mcqgenerator.logger import logging
 
 with open("D:\ML Projects\MCQ GEN\Response.json",'r') as file:
     RESPONSE_JSON = json.load(file)
-
+   
 st.title("MCQs Creator Application with Langchain")
 
 
@@ -39,7 +39,7 @@ with st.form("user_input"):
                         "number":mcq_count,
                         "subject":subject,
                         "tone":tone,
-                        "response_json":json.dump(RESPONSE_JSON)
+                        "response_json":json.dumps(RESPONSE_JSON)
                    }
                 )
             except Exception as e:
